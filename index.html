@@ -1,0 +1,65 @@
+<!-- 
+1 - Criar uma conta em https://console.cloud.google.com/
+2 - Criar um projeto
+3 - Ativar a "API Places" em "APIs e Serviços" > "Biblioteca"
+4 - Em "APIs e Serviços" > verificar se a "API Places" e "Places UI Kit" está ativa
+4 - Criar uma chave de API em "APIs e Serviços" > "Credenciais"
+5 - Copiar a chave de API gerada
+6 - Substituir a chave de API no código abaixo 
+-->
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Places API - Comentários</title>
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+  <div class="container mx-auto w-screen h-screen flex flex-col justify-center items-center">
+    <div id="resultado"></div>
+  </div>
+
+  <script>
+    // Sua chave de API
+    const API_KEY = 'AIzaSyA-TE3Li-z_hCS2sjlTpfl8tOhCrj8GIpM';
+
+    // ID do local que você quer buscar
+    const PLACE_ID = 'ChIJWQaaMxO22JQR7i72tVZeuio';
+
+    // URL da API para buscar detalhes do local
+    const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${PLACE_ID}&fields=name,rating,reviews&key=${API_KEY}`;
+
+    // Faz a requisição usando jQuery
+    $.getJSON(url, function (data) {
+      const resultadoDiv = $("#resultado");
+      if (data.status === "OK") {
+        const place = data.result;
+        const reviewsHtml = place.reviews.map(review => `
+          <div class="bg-white rounded-lg p-4 shadow-md">
+            <strong class="text-blue-600">${review.author_name}</strong> 
+            <span class="text-yellow-500">${'⭐'.repeat(review.rating)}</span>
+            <p class="text-gray-700">${review.text}</p>
+          </div>
+        `).join("");
+
+        resultadoDiv.html(`
+          <h2 class="text-2xl font-bold text-center mb-6">Avaliações de ${place.name}</h2>
+          <p class="text-1xl font-bold text-center mb-6"><strong>Avaliação média:</strong> ${place.rating || 'N/A'}</p>
+          <div class="grid grid-cols-3 gap-4">
+            ${reviewsHtml}
+          </div>
+        `);
+      } else {
+        resultadoDiv.html(`<p class="text-red-500">Erro ao buscar dados: ${data.status}</p>`);
+      }
+    }).fail(function (error) {
+      console.error("Erro na requisição:", error);
+      $("#resultado").html(`<p class="text-red-500">Erro na requisição</p>`);
+    });
+  </script>
+</body>
+</html>
